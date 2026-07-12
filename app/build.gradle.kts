@@ -5,6 +5,9 @@ plugins {
 
 android {
     namespace = "com.ai.aichatapp"
+
+    val openAiApiKey = System.getenv("OPENAI_API_KEY").orEmpty()
+
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -19,6 +22,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "OPENAI_API_KEY", "\"$openAiApiKey\"")
     }
 
     buildTypes {
@@ -36,6 +40,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
