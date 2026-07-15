@@ -4,8 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -22,10 +25,10 @@ fun ChatScreen(
     modifier: Modifier = Modifier,
     viewModel: ChatViewModel = viewModel()
 ) {
-    val messages by viewModel.messages.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     ChatContent(
-        messages = messages,
+        uiState = uiState,
         onSendMessage = viewModel::onSendMessage,
         modifier = modifier
     )
@@ -33,7 +36,7 @@ fun ChatScreen(
 
 @Composable
 fun ChatContent(
-    messages: List<ChatUiMessage>,
+    uiState: ChatUiState,
     onSendMessage: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -45,13 +48,23 @@ fun ChatContent(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(messages, key = { it.id }) { message ->
+            items(uiState.messages, key = { it.id }) { message ->
                 MessageBubble(message = message)
             }
         }
 
+        uiState.errorMessage?.let { errorMessage ->
+            Text(
+                text = errorMessage,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+
         MessageInputBar(
-            onSendMessage = onSendMessage
+            onSendMessage = onSendMessage,
+            isLoading = uiState.isLoading
         )
     }
 }
@@ -61,16 +74,18 @@ fun ChatContent(
 fun ChatScreenPreview() {
     AIChatAppTheme {
         ChatContent(
-            messages = listOf(
-                ChatUiMessage(
-                    id = 1L,
-                    text = "Preview user message",
-                    sender = MessageSender.User
-                ),
-                ChatUiMessage(
-                    id = 2L,
-                    text = "Preview assistant message",
-                    sender = MessageSender.Assistant
+            uiState = ChatUiState(
+                messages = listOf(
+                    ChatUiMessage(
+                        id = 1L,
+                        text = "Preview user message",
+                        sender = MessageSender.User
+                    ),
+                    ChatUiMessage(
+                        id = 2L,
+                        text = "Preview assistant message",
+                        sender = MessageSender.Assistant
+                    )
                 )
             ),
             onSendMessage = {}

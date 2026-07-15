@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun MessageInputBar(
     onSendMessage: (String) -> Unit,
+    isLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
     var messageText by remember { mutableStateOf("") }
@@ -37,6 +38,7 @@ fun MessageInputBar(
             OutlinedTextField(
                 value = messageText,
                 onValueChange = { messageText = it },
+                enabled = !isLoading,
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 8.dp),
@@ -51,9 +53,10 @@ fun MessageInputBar(
                         onSendMessage(trimmedMessage)
                         messageText = ""
                     }
-                }
+                },
+                enabled = !isLoading
             ) {
-                Text("Send")
+                Text(if (isLoading) "Sending..." else "Send")
             }
         }
     }
